@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=yes">
+  <title>Clozzy • private space for couples</title>
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #fce4f0 0%, #e0f0fd 100%);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: #2d2a40;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.8rem;
+      margin: 0;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 70%;
+      height: 70%;
+      background: radial-gradient(circle, rgba(255, 182, 193, 0.4) 0%, transparent 65%);
+      border-radius: 50%;
+      z-index: 0;
+      animation: blobMove 14s infinite alternate ease-in-out;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      bottom: -15%;
+      right: -5%;
+      width: 65%;
+      height: 65%;
+      background: radial-gradient(circle, rgba(135, 206, 250, 0.45) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: 0;
+      animation: blobMove2 12s infinite alternate ease-in-out;
+    }
+
+    @keyframes blobMove {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(5%, 4%) scale(1.1); }
+    }
+    @keyframes blobMove2 {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-4%, -5%) scale(1.08); }
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 10;
+      max-width: 1250px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .glass-card {
+      background: rgba(255, 245, 250, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 3.5rem;
+      padding: 2.5rem 2.3rem;
+      box-shadow: 0 35px 60px rgba(180, 100, 140, 0.25), 0 10px 25px rgba(100, 140, 200, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2.2rem;
+      animation: gentleFloat 7s infinite alternate ease-in-out;
+    }
+
+    @keyframes gentleFloat {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-7px); }
+    }
+
+    .info-panel {
+      flex: 1 1 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.7rem;
+      animation: fadeSlideLeft 0.9s ease-out;
+    }
+
+    @keyframes fadeSlideLeft {
+      0% { opacity: 0; transform: translateX(-30px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .brand-icon {
+      
+      width: 54px;
+      height: 54px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: white;
+     
+      
+    }
+
+    @keyframes softRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .brand h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #c44569, #3c6e9c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .early-badge {
+      background: rgba(255, 182, 193, 0.45);
+      border: 1px solid rgba(200, 120, 150, 0.5);
+      padding: 0.4rem 1.4rem;
+      border-radius: 3rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #b13e5c;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: fit-content;
+      backdrop-filter: blur(8px);
+      animation: glowPulse 2.2s infinite;
+    }
+
+    @keyframes glowPulse {
+      0% { box-shadow: 0 0 5px rgba(255,182,193,0.5); }
+      50% { box-shadow: 0 0 20px rgba(255,150,180,0.9); }
+      100% { box-shadow: 0 0 5px rgba(255,182,193,0.5); }
+    }
+
+    .headline h2 {
+      font-size: 2.9rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #2c2a40;
+    }
+
+    .highlight-pink {
+      background: linear-gradient(120deg, #e8436e, #d46a8b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .highlight-blue {
+      background: linear-gradient(120deg, #3b82b6, #6093c0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .desc-text {
+      font-size: 1.1rem;
+      color: #3e3a54;
+      margin: 0.3rem 0 0.8rem;
+      line-height: 1.6;
+    }
+
+    .features-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      margin: 0.2rem 0 1rem;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(12px);
+      border-radius: 1.5rem;
+      padding: 0.9rem 1.3rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      border: 1px solid rgba(255, 210, 220, 0.8);
+      transition: all 0.3s;
+      animation: featureAppear 0.6s ease-out both;
+      box-shadow: 0 5px 12px rgba(180, 130, 150, 0.15);
+    }
+
+    .feature-card:nth-child(1) { animation-delay: 0.1s; }
+    .feature-card:nth-child(2) { animation-delay: 0.25s; }
+    .feature-card:nth-child(3) { animation-delay: 0.4s; }
+    .feature-card:nth-child(4) { animation-delay: 0.55s; }
+
+    @keyframes featureAppear {
+      0% { opacity: 0; transform: translateY(15px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .feature-icon {
+      font-size: 1.6rem;
+      color: #d9587b;
+      width: 32px;
+      text-align: center;
+      margin-top: 0.2rem;
+    }
+
+    .feature-content strong {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #2f2c4a;
+    }
+
+    .feature-content p {
+      font-size: 0.85rem;
+      color: #4a455e;
+      margin-top: 0.2rem;
+    }
+
+    .register-box {
+      background: rgba(255, 240, 245, 0.75);
+      backdrop-filter: blur(20px);
+      border-radius: 2.2rem;
+      padding: 1.7rem 1.7rem;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      margin-top: 0.3rem;
+      animation: fadeUp 0.8s ease;
+    }
+
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .register-box h3 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 1.3rem;
+      color: #382e44;
+    }
+
+    .input-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .input-field {
+      display: flex;
+      align-items: center;
+      background: white;
+      border: 1px solid #f3c7d7;
+      border-radius: 1.3rem;
+      padding: 0.8rem 1.3rem;
+      transition: 0.25s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .input-field i {
+      color: #c95b7c;
+      margin-right: 0.8rem;
+      font-size: 1rem;
+    }
+
+    .input-field input, .input-field textarea {
+      background: transparent;
+      border: none;
+      width: 100%;
+      font-size: 1rem;
+      color: #2a2338;
+      outline: none;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    .input-field input::placeholder, .input-field textarea::placeholder {
+      color: #9a8ba0;
+    }
+
+    .input-field:focus-within {
+      border-color: #e87a9c;
+      box-shadow: 0 0 0 3px rgba(232, 122, 156, 0.25);
+    }
+
+    .btn {
+      background: linear-gradient(115deg, #f687a8, #6fa8dc);
+      border: none;
+      width: 100%;
+      padding: 0.95rem;
+      border-radius: 1.4rem;
+      font-weight: 650;
+      font-size: 1.1rem;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 12px 22px -8px rgba(210, 100, 140, 0.5);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    .btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 18px 28px -6px rgba(180, 100, 150, 0.6);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .privacy-note {
+      font-size: 0.8rem;
+      color: #6e5f7a;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    #formFeedback, #feedbackStatus {
+      margin-top: 0.8rem;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .status-message {
+      padding: 1rem;
+      border-radius: 1.5rem;
+      text-align: center;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+
+    .playstore-btn {
+      background: #1a1a2e;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.9rem 2rem;
+      border-radius: 3rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .playstore-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+    }
+
+    .playstore-btn i {
+      font-size: 1.8rem;
+    }
+
+    /* right side: gallery + phone */
+    .showcase-panel {
+      flex: 1 1 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 245, 250, 0.5);
+      backdrop-filter: blur(16px);
+      border-radius: 3rem;
+      padding: 1.8rem 1.2rem;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      animation: fadeSlideRight 0.9s ease;
+    }
+
+    @keyframes fadeSlideRight {
+      0% { opacity: 0; transform: translateX(30px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    .phone-mock {
+      background: #fbe9f0;
+      border-radius: 2.8rem;
+      padding: 0.7rem;
+      box-shadow: 0 30px 40px rgba(150, 100, 120, 0.3), inset 0 0 0 2px white;
+      margin-bottom: 1.5rem;
+    }
+
+    .screen {
+      background: linear-gradient(145deg, #ffeef4, #e6f0fa);
+      border-radius: 2.3rem;
+      width: 230px;
+      aspect-ratio: 9 / 18;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      border: 1px solid rgba(255,255,255,0.9);
+    }
+
+    .spinner-gallery {
+      width: 150px;
+      height: 150px;
+      position: relative;
+      margin: 0.5rem auto 0.8rem;
+      perspective: 800px;
+    }
+
+    .carousel-3d {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      transform-style: preserve-3d;
+      animation: spinGallery 20s infinite linear;
+    }
+
+    @keyframes spinGallery {
+      from { transform: rotateY(0deg); }
+      to { transform: rotateY(360deg); }
+    }
+
+    .carousel-item {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      left: calc(50% - 50px);
+      top: calc(50% - 50px);
+      border-radius: 1.5rem;
+      background-color: rgba(255, 240, 245, 0.8);
+      backdrop-filter: blur(6px);
+      border: 2px solid rgba(255, 180, 200, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #c44569;
+      box-shadow: 0 10px 20px rgba(180, 100, 130, 0.3);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .carousel-item:nth-child(1) { transform: rotateY(0deg) translateZ(170px); background-image: url('assets/photo1.jpg'); }
+    .carousel-item:nth-child(2) { transform: rotateY(60deg) translateZ(170px); background-image: url('assets/photo2.jpg'); }
+    .carousel-item:nth-child(3) { transform: rotateY(120deg) translateZ(170px); background-image: url('assets/photo3.jpg'); }
+    .carousel-item:nth-child(4) { transform: rotateY(180deg) translateZ(170px); background-image: url('assets/photo4.jpg'); }
+    .carousel-item:nth-child(5) { transform: rotateY(240deg) translateZ(170px); background-image: url('assets/photo5.jpg'); }
+    .carousel-item:nth-child(6) { transform: rotateY(300deg) translateZ(170px); background-image: url('assets/photo6.jpg'); }
+
+    .app-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #382e44;
+      margin-top: 0.2rem;
+    }
+
+    .badge-private {
+      background: rgba(255,255,255,0.8);
+      padding: 0.25rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.7rem;
+      color: #b13e5c;
+      font-weight: 600;
+    }
+
+    .gallery-section {
+      width: 100%;
+      margin-top: 1.2rem;
+    }
+
+    .gallery-title {
+      font-weight: 600;
+      color: #382e44;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.7rem;
+    }
+
+    .gallery-thumb {
+      aspect-ratio: 9 / 16;
+      background-color: #f0e0f0;
+      border-radius: 1.2rem;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 6px 14px rgba(150, 100, 130, 0.2);
+      border: 2px solid rgba(255,255,255,0.8);
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .gallery-thumb::after {
+      content: '\f030';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+      color: #c44569;
+      opacity: 0.5;
+      z-index: 0;
+    }
+
+    .gallery-thumb:hover {
+      transform: scale(1.04);
+      box-shadow: 0 12px 22px rgba(180, 110, 140, 0.35);
+    }
+
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox.active {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 85%;
+      border-radius: 2rem;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    }
+
+    .close-lightbox {
+      position: absolute;
+      top: 2rem; right: 2rem;
+      font-size: 2.5rem;
+      color: white;
+      cursor: pointer;
+      z-index: 1001;
+    }
+
+    .bottom-section {
+      background: rgba(255, 245, 250, 0.7);
+      backdrop-filter: blur(20px);
+      border-radius: 3rem;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      animation: fadeUp 1s ease;
+    }
+
+    .feedback-box h3 {
+      font-size: 1.5rem;
+      color: #382e44;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 800px) {
+      .glass-card {
+        flex-direction: column;
+        padding: 2rem 1.5rem;
+      }
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Main Card -->
+    <div class="glass-card">
+      <div class="info-panel">
+        <div class="brand">
+          <div class="brand-icon">
+            <img src="assets/icon_colord.png" alt="Clozzy Logo" style="width: 60px; height: 60px; border-radius: 18px;">
+          </div>
+          <h1>Clozzy</h1>
+        </div>
+        <div class="early-badge">
+          <i class="fas fa-gem"></i> <span>early access for couples</span>
+        </div>
+        <div class="headline">
+          <h2>Your <span class="highlight-pink">private</span> <span class="highlight-blue">universe</span> for two.</h2>
+        </div>
+        <div class="desc-text">
+          Clozzy is a secure, intimate app designed exclusively for couples. 
+          Escape the noise of social media and enjoy a private space where only you 
+          and your partner can share moods, photos, messages, and daily moments.
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-lock"></i></div>
+            <div class="feature-content"><strong>Private & Exclusive</strong><p>Only you and your partner can access your shared space.</p></div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-smile"></i></div>
+            <div class="feature-content"><strong>Mood & Status Updates</strong><p>Let your partner know how you're feeling at a glance.</p></div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-comment-dots"></i></div>
+            <div class="feature-content"><strong>Messages & Love Notes</strong><p>Chat privately in your encrypted thread.</p></div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-camera-retro"></i></div>
+            <div class="feature-content"><strong>Photos & Timeline</strong><p>Build a private timeline only you two can revisit.</p></div>
+          </div>
+        </div>
+
+        <div class="register-box" id="registrationArea">
+          <h3><i class="fas fa-envelope-open-text" style="color:#c44569;"></i> Join early access</h3>
+          <div id="statusContainer"></div>
+          <form id="earlyForm">
+            <div class="input-group">
+              <div class="input-field">
+                <i class="fas fa-user"></i>
+                <input type="text" id="name" placeholder="Your name" required>
+              </div>
+            </div>
+            <div class="input-group">
+              <div class="input-field">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email" placeholder="Email address" required>
+              </div>
+            </div>
+            <button type="submit" class="btn" id="submitBtn"><i class="fas fa-paper-plane"></i> Secure my spot</button>
+          </form>
+          <div id="formFeedback"></div>
+          <div class="privacy-note"><i class="fas fa-shield-alt"></i> We respect your privacy. No spam, ever.</div>
+        </div>
+      </div>
+
+      <div class="showcase-panel">
+        <div class="phone-mock">
+          <div class="screen">
+            <div style="font-weight:600; color:#382e44;">Clozzy</div>
+            <div class="spinner-gallery">
+              <div class="carousel-3d">
+                <div class="carousel-item"><i class="fas fa-heart"></i></div>
+                <div class="carousel-item"><i class="fas fa-camera"></i></div>
+                <div class="carousel-item"><i class="fas fa-comment"></i></div>
+                <div class="carousel-item"><i class="fas fa-moon"></i></div>
+                <div class="carousel-item"><i class="fas fa-calendar-check"></i></div>
+                <div class="carousel-item"><i class="fas fa-hand-holding-heart"></i></div>
+              </div>
+            </div>
+            <div class="app-title">just us</div>
+            <div class="badge-private"><i class="fas fa-lock"></i> private space</div>
+          </div>
+        </div>
+        <div class="gallery-section">
+          <div class="gallery-title"><i class="fas fa-images"></i> App previews</div>
+          <div class="gallery-grid" id="screenshotGrid"></div>
+        </div>
+        <div style="margin-top:0.5rem; color:#4a3b5c; font-style:italic;">"Finally, a place where we truly connect."</div>
+      </div>
+    </div>
+
+    <!-- Bottom: Feedback Section -->
+    <div class="bottom-section">
+      <div class="feedback-box">
+        <h3><i class="fas fa-comment-dots" style="color:#c44569;"></i> Send us your feedback</h3>
+        <form id="feedbackForm">
+          <div class="input-group">
+            <div class="input-field">
+              <i class="fas fa-user"></i>
+              <input type="text" id="feedbackName" placeholder="Your name (optional)">
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="input-field">
+              <i class="fas fa-envelope"></i>
+              <input type="email" id="feedbackEmail" placeholder="Your email">
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="input-field">
+              <i class="fas fa-message"></i>
+              <textarea id="feedbackMessage" rows="3" placeholder="Tell us what you think..."></textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn" id="feedbackBtn"><i class="fas fa-paper-plane"></i> Send Feedback</button>
+        </form>
+        <div id="feedbackStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <span class="close-lightbox" id="closeLightbox">&times;</span>
+    <img id="lightboxImg" src="" alt="app screenshot">
+  </div>
+
+  <script>
+    (function() {
+      // ========== FIREBASE CONFIGURATION ==========
+      // REPLACE with your Firebase config
+      const firebaseConfig = {
+    apiKey: "AIzaSyDboAkuycuusLIxaKPuxKA7vUhLRc-Zwm8",
+    authDomain: "clozzy-early-access.firebaseapp.com",
+    projectId: "clozzy-early-access",
+    storageBucket: "clozzy-early-access.firebasestorage.app",
+    messagingSenderId: "60518810918",
+    appId: "1:60518810918:web:9aa4a937b08427a65cede7"
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      // ========== CHECK REGISTRATION STATUS ==========
+      const statusContainer = document.getElementById('statusContainer');
+      const registrationForm = document.getElementById('earlyForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const formFeedback = document.getElementById('formFeedback');
+
+      async function checkRegistrationStatus(email) {
+        if (!email || !email.includes('@')) return;
+        
+        try {
+          const snapshot = await db.collection('earlyAccess')
+            .where('email', '==', email.toLowerCase().trim())
+            .get();
+
+          if (!snapshot.empty) {
+            // User already registered
+            statusContainer.innerHTML = `
+              <div class="status-message" style="background: rgba(200, 250, 200, 0.4); color: #1a5c2a;">
+                <i class="fas fa-check-circle"></i> You're already registered! 🎉<br>
+                <span style="font-size:0.9rem;">Download the app from Play Store</span>
+                <div style="margin-top:1rem;">
+                  <a href="https://play.google.com/store/apps/details?id=com.clozzy.app" target="_blank" class="playstore-btn">
+                    <i class="fab fa-google-play"></i>
+                    <span>GET IT ON<br><small>Google Play</small></span>
+                  </a>
+                </div>
+              </div>
+            `;
+            registrationForm.style.display = 'none';
+          } else {
+            // Not registered yet
+            statusContainer.innerHTML = `
+              <div class="status-message" style="background: rgba(255, 200, 150, 0.4); color: #8a4a20;">
+                <i class="fas fa-clock"></i> You're not registered yet.<br>
+                <span style="font-size:0.9rem;">Sign up below – access granted within a few hours!</span>
+              </div>
+            `;
+            registrationForm.style.display = 'block';
+          }
+        } catch (error) {
+          console.error('Check error:', error);
+        }
+      }
+
+      // Listen for email input to check status
+      const emailInput = document.getElementById('email');
+      emailInput.addEventListener('blur', function() {
+        const email = emailInput.value.trim();
+        if (email && email.includes('@')) {
+          checkRegistrationStatus(email);
+        }
+      });
+
+      // ========== REGISTRATION FORM ==========
+      registrationForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const name = document.getElementById('name').value.trim();
+        const email = emailInput.value.trim();
+
+        if (!name || !email) {
+          formFeedback.innerHTML = '<span style="color:#c44569;"><i class="fas fa-exclamation-circle"></i> Please fill all fields.</span>';
+          return;
+        }
+        if (!email.includes('@') || !email.includes('.')) {
+          formFeedback.innerHTML = '<span style="color:#c44569;"><i class="fas fa-exclamation-triangle"></i> Valid email required.</span>';
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving...';
+
+        try {
+          await db.collection('earlyAccess').add({
+            name: name,
+            email: email.toLowerCase().trim(),
+            registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
+            status: 'pending'
+          });
+
+          formFeedback.innerHTML = '<span style="color:#2d5f7a;"><i class="fas fa-check-circle"></i> Welcome, ' + 
+            escapeHTML(name) + '! Access granted within hours. 💕</span>';
+          
+          // Update status after registration
+          checkRegistrationStatus(email);
+          registrationForm.reset();
+        } catch (error) {
+          console.error('Registration error:', error);
+          formFeedback.innerHTML = '<span style="color:#c44569;">Error. Please try again.</span>';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Secure my spot';
+        }
+      });
+
+      // ========== FEEDBACK FORM ==========
+      const feedbackForm = document.getElementById('feedbackForm');
+      const feedbackBtn = document.getElementById('feedbackBtn');
+      const feedbackStatus = document.getElementById('feedbackStatus');
+
+      feedbackForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const name = document.getElementById('feedbackName').value.trim();
+        const email = document.getElementById('feedbackEmail').value.trim();
+        const message = document.getElementById('feedbackMessage').value.trim();
+
+        if (!email || !message) {
+          feedbackStatus.innerHTML = '<span style="color:#c44569;">Email and message required.</span>';
+          return;
+        }
+
+        feedbackBtn.disabled = true;
+        feedbackBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sending...';
+
+        try {
+          await db.collection('feedback').add({
+            name: name || 'Anonymous',
+            email: email.toLowerCase().trim(),
+            message: message,
+            sentAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          feedbackStatus.innerHTML = '<span style="color:#2d5f7a;"><i class="fas fa-check-circle"></i> Thanks for your feedback! 💌</span>';
+          feedbackForm.reset();
+        } catch (error) {
+          console.error('Feedback error:', error);
+          feedbackStatus.innerHTML = '<span style="color:#c44569;">Error sending. Try again.</span>';
+        } finally {
+          feedbackBtn.disabled = false;
+          feedbackBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Feedback';
+        }
+      });
+
+      // ========== SCREENSHOT GALLERY ==========
+      const screenshotFiles = [
+        './assets/s1.jpeg', './assets/s2.jpeg', './assets/s3.jpeg',
+        './assets/s4.jpeg', './assets/s8.jpeg', './assets/s6.jpeg'
+      ];
+      
+      const grid = document.getElementById('screenshotGrid');
+      screenshotFiles.forEach(src => {
+        const thumb = document.createElement('div');
+        thumb.className = 'gallery-thumb';
+        thumb.style.backgroundImage = `url('${src}')`;
+        thumb.addEventListener('click', () => openLightbox(src));
+        grid.appendChild(thumb);
+      });
+
+      // Lightbox
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightboxImg');
+      document.getElementById('closeLightbox').addEventListener('click', () => {
+        lightbox.classList.remove('active');
+      });
+      lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) lightbox.classList.remove('active');
+      });
+      function openLightbox(src) {
+        lightboxImg.src = src;
+        lightbox.classList.add('active');
+      }
+
+      function escapeHTML(str) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
+    })();
+  </script>
+</body>
+</html>
